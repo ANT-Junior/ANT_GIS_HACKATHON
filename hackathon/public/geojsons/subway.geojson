@@ -1,0 +1,110 @@
+{
+    "type": "FeatureCollection",
+    "name": "Выходы_метро",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "Number": "7",
+                "Text": "Потапово"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.48997790288288,
+                    55.55357172589314
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Number": "6",
+                "Text": "Потапово"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.49066179030868,
+                    55.55354510045108
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Number": "5",
+                "Text": "Потапово"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.49107205089893,
+                    55.5518380874187
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Number": "3",
+                "Text": "Потапово"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.49546517196439,
+                    55.55201187138158
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Number": "4",
+                "Text": "Потапово"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.49652203989616,
+                    55.55205907747738
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Number": "2",
+                "Text": "Потапово"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.4968200110759,
+                    55.5535969793969
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Number": "1",
+                "Text": "Потапово"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.49579152990711,
+                    55.553573555121325
+                ]
+            }
+        }
+    ],
+    "crs": {
+        "type": "name",
+        "properties": {
+            "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+        }
+    }
+}
