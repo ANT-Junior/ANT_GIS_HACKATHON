@@ -8,6 +8,116 @@ import layersPanel from './layersPanel';
 import * as turf from '@turf/turf';
 import 'material-icons/iconfont/material-icons.css';
 
+class Point {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+class Edge {
+    constructor(start, end) {
+        this.start = start || new Point(0, 0);
+        this.end = end || new Point(0, 0);
+    }
+}
+
+class VoronoiDiagram {
+    constructor(points) {
+        this.points = points;
+        this.edges = [];
+        this.cells = {};
+    }
+
+    create() {
+        // Создаем начальную структуру для хранения ребер и ячеек
+        for (let i = 0; i < this.points.length; i++) {
+            const point = this.points[i];
+            this.cells[point] = { edges: [], neighbors: [] };
+        }
+        console.log(this.cells);
+
+        // Сортируем точки по координате Y
+        this.points.sort((a, b) => a.y - b.y);
+
+        let sweepLineY = this.points[0].y;
+        let eventQueue = [...this.points];
+
+        while (eventQueue.length > 0) {
+            const nextEvent = eventQueue.shift();
+            if (nextEvent instanceof Point) {
+                this.handlePoint(nextEvent);
+            } else {
+                this.handleCircleEvent(nextEvent);
+            }
+        }
+        console.log(this.edges);
+
+        return this.edges;
+    }
+
+    handlePoint(point) {
+        // Обрабатываем точку
+    }
+
+    handleCircleEvent(event) {
+        // Обрабатываем событие круга
+    }
+
+    addEdge(edge) {
+        this.edges.push(edge);
+    }
+
+    getVoronoiCell(point) {
+        return this.cells[point];
+    }
+}
+
+function area(poly) {
+    var s = 0.0;
+    if (!poly.coordinates) {
+        var ring = poly[0];
+    } else {
+        var ring = poly.coordinates[0];
+    }
+    for (let i = 0; i < (ring.length - 1); i++) {
+        s += (ring[i][0] * ring[i + 1][1] - ring[i + 1][0] * ring[i][1]);
+    }
+    return 0.5 * s;
+}
+
+function centroid(poly) {
+    var c = [0, 0];
+    console.log(poly);
+    if (!poly.coordinates) {
+        var ring = poly[0];
+    } else {
+        var ring = poly.coordinates[0];
+    }
+
+    for (let i = 0; i < (ring.length - 1); i++) {
+        c[0] += (ring[i][0] + ring[i + 1][0]) * (ring[i][0] * ring[i + 1][1] - ring[i + 1][0] * ring[i][1]);
+        c[1] += (ring[i][1] + ring[i + 1][1]) * (ring[i][0] * ring[i + 1][1] - ring[i + 1][0] * ring[i][1]);
+    }
+    var a = area(poly);
+    c[0] /= a * 6;
+    c[1] /= a * 6;
+    return c;
+}
+
+function centroidMulti(poly) {
+    if (poly?.type === 'Feature' && poly?.geometry) {
+        poly = poly.geometry;
+    }
+    return poly.coordinates.map(centroid)
+        .reduce((r, pair) => {
+            r[0].push(pair[0]);
+            r[1].push(pair[1]);
+            return r
+        }, [[], []])
+        .map((a) => a.reduce((p, c) => p + c, 0) / a.length);
+}
+
 function decodeGeoMap(str, precision) {
     var index = 0,
         lat = 0,
@@ -51,7 +161,7 @@ function decodeGeoMap(str, precision) {
         lat += latitude_change;
         lng += longitude_change;
 
-        coordinates.push([lat / factor, lng / factor]);
+        coordinates.push([lng / factor, lat / factor]);
     }
 
     return coordinates;
@@ -65,8 +175,10 @@ const MAPTILER_KEY = 'aeGkrJSdDcp34Gpzgrr5';
 const map = new Mapgl({
     container: 'map',
     style: `https://api.maptiler.com/maps/basic-v2/style.json?key=${MAPTILER_KEY}`,
-    center: [37.632375, 55.745064],
+    center: [37.487777, 55.547169],
     hash: true,
+    pitch: -108.2,
+
     zoom: 15.99,
     /*  pitch: 40,
      bearing: 20,
@@ -77,7 +189,7 @@ const map = new Mapgl({
 const controllPanel_ = new controllPanel();
 var marker;
 
-var markers_street;
+var markers_street = [];
 
 var layers_streets_ids = [];
 var source_streets_ids = [];
@@ -199,7 +311,7 @@ function readGeoJson(layer) {
                     'source': prefixSource + layer.src,
                     'paint': {
                         'circle-radius': 8,
-                        'circle-color': '#007cbf',
+                        'circle-color': layer.color ?? '#007cbf',
                         "circle-opacity": 0.4,
                     }
                 });
@@ -218,6 +330,7 @@ function readGeoJson(layer) {
                 });
                 return
             }
+            voron(geoJSONcontent.features);
             map.addLayer({
                 'id': prefixLayer + layer.src,
                 'type': 'fill',
@@ -231,6 +344,23 @@ function readGeoJson(layer) {
         })
         .catch((e) => console.error(e));
 
+}
+
+function voron(feauters) {
+    let points = [];
+    feauters.forEach((q) => {
+        let point;
+        if (q.geometry.type == "MultiPolygon") {
+            point = centroidMulti(q.geometry);
+        } else {
+            point = centroid(q.geometry);
+        }
+        points.push(new Point(point[1], point[0]));
+    });
+    console.log(points);
+    let voronov = new VoronoiDiagram(points);
+    let edges = voronov.create();
+    console.log(edges);
 }
 
 const houses = [srcToGeo + "House_1_v2.geojson", srcToGeo + "House_2_v2.geojson", srcToGeo + "House_3_v2.geojson"]
@@ -282,6 +412,13 @@ const layersRoad = {
         enabled: true,
         default: false,
     },
+    "subway.geojson": {
+        src: srcToGeo + "subway.geojson",
+        name: "Метро",
+        type: 'metro',
+        enabled: true,
+        default: false,
+    },
     "districts_v2.geojson": {
         src: srcToGeo + "districts_v2.geojson",
         name: "Округа",
@@ -293,6 +430,46 @@ const layersRoad = {
         src: srcToGeo + "cemetery_house.geojson",
         name: "Тестовый дом",
         color: "pink",
+        enabled: true,
+        default: false,
+    },
+    "bank.geojson": {
+        src: srcToGeo + "bank.geojson",
+        name: "Банки",
+        color: "#d28306",
+        type: 'point',
+        enabled: true,
+        default: false,
+    },
+    "healthcare.geojson": {
+        src: srcToGeo + "healthcare.geojson",
+        name: "Здравоохранение",
+        color: "#ff7",
+        type: 'point',
+        enabled: true,
+        default: false,
+    },
+    "school.geojson": {
+        src: srcToGeo + "school.geojson",
+        name: "Школы",
+        color: "#2495fa",
+        type: 'point',
+        enabled: true,
+        default: false,
+    },
+    "post_office.geojson": {
+        src: srcToGeo + "post_office.geojson",
+        name: "Почтовые службы",
+        color: "#6a4bc5",
+        type: 'point',
+        enabled: true,
+        default: false,
+    },
+    "points.geojson": {
+        src: srcToGeo + "points.geojson",
+        name: "Тест",
+        color: "#dd2222",
+        type: 'point',
         enabled: true,
         default: false,
     },
@@ -380,6 +557,12 @@ map.on('load', async () => {
             }
         }
     }
+
+    map.on('click', (e) => {
+        let coor = e.lngLat.wrap();
+        document.getElementById('input_coor').value =
+            `${coor['lat']},${coor['lng']}`;
+    });
 });
 
 function addLayer(feauters) {
@@ -571,9 +754,70 @@ addEventListener('DOMContentLoaded', function () {
     document.getElementById('panelLines').addEventListener('submit', function () {
         event.preventDefault();
         getSepts();
-    })
-})
+    });
+    document.getElementById('play').addEventListener('click', function () {
 
+        if (this.classList.contains('active')) {
+            return;
+        }
+        this.classList.add('active');
+        changeLayers();
+    });
+
+    document.getElementById('test_bb').addEventListener('click', function(){
+        getSeptsLayer();
+    })
+
+});
+
+function changeLayers() {
+    document.getElementById('toggle_' + srcToGeo + 'House_1_v2.geojson').setAttribute('checked', 'true');
+    document.getElementById('toggle_' + srcToGeo + 'House_1_v2.geojson').dispatchEvent(new Event('change', { bubbles: true }))
+    document.getElementById('toggle_' + srcToGeo + 'Streets_1_v2.geojson').setAttribute('checked', 'true');
+    document.getElementById('toggle_' + srcToGeo + 'Streets_1_v2.geojson').dispatchEvent(new Event('change', { bubbles: true }))
+    document.getElementById('toggle_' + srcToGeo + 'subway.geojson').setAttribute('checked', 'true');
+    document.getElementById('toggle_' + srcToGeo + 'subway.geojson').dispatchEvent(new Event('change', { bubbles: true }))
+
+    setTimeout(function () {
+        document.getElementById('toggle_' + srcToGeo + 'Streets_2_v2.geojson').setAttribute('checked', 'true');
+        document.getElementById('toggle_' + srcToGeo + 'Streets_2_v2.geojson').dispatchEvent(new Event('change', { bubbles: true }))
+        document.getElementById('toggle_' + srcToGeo + 'House_2_v2.geojson').setAttribute('checked', 'true');
+        document.getElementById('toggle_' + srcToGeo + 'House_2_v2.geojson').dispatchEvent(new Event('change', { bubbles: true }));
+
+        setTimeout(function () {
+            document.getElementById('toggle_' + srcToGeo + 'Streets_3_v2.geojson').setAttribute('checked', 'true');
+            document.getElementById('toggle_' + srcToGeo + 'Streets_3_v2.geojson').dispatchEvent(new Event('change', { bubbles: true }))
+            document.getElementById('toggle_' + srcToGeo + 'House_3_v2.geojson').setAttribute('checked', 'true');
+            document.getElementById('toggle_' + srcToGeo + 'House_3_v2.geojson').dispatchEvent(new Event('change', { bubbles: true }));
+        }, 25000);
+    }, 20000);
+}
+
+function addPlayButton() {
+
+    let button = document.createElement('button');
+    button.className = 'button';
+    button.setAttribute('type', 'button');
+    button.id = 'play';
+    button.innerHTML = `<span class="">
+                        Процесс застройки
+                        </span>`;
+    let containerButton = document.createElement('div');
+    containerButton.className = 'container_button_play';
+    containerButton.appendChild(button);
+
+    let button_test = document.createElement('button');
+    button_test.className = 'button';
+    button_test.setAttribute('type', 'button');
+    button_test.id = 'test_bb';
+    button_test.innerHTML = `<span class="">
+                        HeatMap
+                        </span>`;
+    containerButton.appendChild(button_test);
+
+    document.querySelector('.maplibregl-control-container').appendChild(containerButton);
+};
+addPlayButton();
 
 function createPanelLayers() {
 
@@ -590,7 +834,7 @@ function addLayerInput(data) {
     let layer = document.createElement('div');
     layer.innerHTML = `<label style="display:flex; flex-direction: column; gap: 10px;">
                     <span>${data.name}</span>
-                    <input type="checkbox" id="toggle_" ${data.default ? 'checked' : ''}/>
+                    <input type="checkbox" id="toggle_${data.src}" ${data.default ? 'checked' : ''}/>
                     </label>`;
     layer.querySelector('input').addEventListener('change', (e) => {
         toggleLayer(data.src);
@@ -631,30 +875,145 @@ function toggleLayer(id) {
     readGeoJson(layersRoad[id.replace(srcToGeo, '')]);
 }
 
+function addLayerPathPre(featurs) {
+
+    featurs.trip.forEach((q, i)=>{
+        let geocoodrd = decodeGeoMap(q.legs[0].shape);
+    
+        source_streets_ids.push(`valhalla_step_${i}_pres`);
+    
+        map.addSource(`valhalla_step_${i}_pres`, {
+            'type': 'geojson',
+            'data': {
+                'type': "Feature",
+                "geometry": { 'type': 'LineString', 'coordinates': geocoodrd },
+            },
+        });
+        layers_streets_ids.push(`valhalla_step_${i}_prel`);
+        map.addLayer({
+            'id': `valhalla_step_${i}_prel`,
+            'source': `valhalla_step_${i}_pres`,
+            "type": 'line',
+            'paint': {
+                'line-color': '#ff0101',
+                "line-width": 6,
+                "line-opacity": 0.3
+            }
+        });
+
+    })
+
+
+    if (featurs.alternates) {
+        featurs.alternates.forEach((q, i) => {
+            let geocoodrd = decodeGeoMap(q.trip.legs[0].shape);
+
+            source_streets_ids.push(`valhalla_step_alt_${i}_pres`);
+            map.addSource(`valhalla_step_alt_${i}_pres`, {
+                'type': 'geojson',
+                'data': {
+                    'type': "Feature",
+                    "geometry": { 'type': 'LineString', 'coordinates': geocoodrd },
+                },
+            });
+            layers_streets_ids.push(`valhalla_step_alt_${i}_prel`);
+            map.addLayer({
+                'id': `valhalla_step_alt_${i}_prel`,
+                'source': `valhalla_step_alt_${i}_pres`,
+                "type": 'line',
+                'paint': {
+                    'line-color': '#ff0101',
+                    "line-opacity": 0.1,
+                    "line-width": 6
+                }
+            });
+        })
+    }
+}
+
+async function getSeptsLayer() {
+    let steps = await fetch('/geojsons/patheth.json').then(
+        response => response.json()
+    );
+    console.log(steps);
+    if (layers_streets_ids.length > 0) {
+        layers_streets_ids.forEach(e => {
+            map.removeLayer(e);
+        })
+        source_streets_ids.forEach(e => {
+            map.removeSource(e)
+        })
+
+        source_streets_ids = []
+        layers_streets_ids = [];
+        if (marker) {
+            marker.remove();
+            marker = null;
+        }
+    }
+
+
+    addLayerPathPre(steps);
+    downloadJSON(steps, 'outSource.json');
+}
+
+
 function addLayerPath(feauters) {
-    let i = 0;
+
     let geocoodrd = decodeGeoMap(feauters.trip.legs[0].shape);
-    layers_streets_ids.push('valhalla_step_s');
 
-   /*  
-    markers_street = new Marker()
-    .setLngLat(e.geometry.coordinates)
-    .addTo(map); */
+    source_streets_ids.push('valhalla_step_sss');
 
-    map.addSource(`valhalla_step_s`, {
+    feauters.trip.locations.forEach((q) => {
+        markers_street.push(new Marker()
+            .setLngLat([q.lon, q.lat])
+            .addTo(map))
+    })
+    console.log(geocoodrd);
+
+    map.addSource(`valhalla_step_sss`, {
         'type': 'geojson',
-        'data': { "type": 'FeatureCollection', "geometry": [geocoodrd] },
+        'data': {
+            'type': "Feature",
+            "geometry": { 'type': 'LineString', 'coordinates': geocoodrd },
+        },
     });
-    layers_streets_ids.push('valhalla_step_l');
+    layers_streets_ids.push('valhalla_step_lll');
     map.addLayer({
-        'id': "valhalla_step_l",
-        'source': 'valhalla_step_s',
+        'id': "valhalla_step_lll",
+        'source': 'valhalla_step_sss',
         "type": 'line',
         'paint': {
-            'line-color': layer.color,
-            "line-width": 4
+            'line-color': '#000',
+            "line-width": 6
         }
     });
+
+    if (feauters.alternates) {
+        feauters.alternates.forEach((q, i) => {
+            let geocoodrd = decodeGeoMap(q.trip.legs[0].shape);
+
+            source_streets_ids.push(`valhalla_step_alt_${i}_sss`);
+            map.addSource(`valhalla_step_alt_${i}_sss`, {
+                'type': 'geojson',
+                'data': {
+                    'type': "Feature",
+                    "geometry": { 'type': 'LineString', 'coordinates': geocoodrd },
+                },
+            });
+            layers_streets_ids.push(`valhalla_step_alt_${i}_lll`);
+            map.addLayer({
+                'id': `valhalla_step_alt_${i}_lll`,
+                'source': `valhalla_step_alt_${i}_sss`,
+                "type": 'line',
+                'paint': {
+                    'line-color': '#000',
+                    "line-opacity": 0.4,
+                    "line-width": 6
+                }
+            });
+        })
+    }
 }
 
 async function getSepts() {
@@ -729,7 +1088,7 @@ async function getSepts() {
             }
         ],
         "units": "kilometers",
-        "alternates": 0,
+        "alternates": 3,
         "id": "valhalla_directions"
     };
 
@@ -739,7 +1098,7 @@ async function getSepts() {
     }).then(
         response => response.json()
     );
-
+    console.log(steps);
     if (layers_streets_ids.length > 0) {
         layers_streets_ids.forEach(e => {
             map.removeLayer(e);
@@ -756,7 +1115,15 @@ async function getSepts() {
         }
     }
 
+    if (markers_street.length > 0) {
+        markers_street.forEach((q, i) => {
+            q.remove();
+        })
+        markers_street = [];
+    }
+
     addLayerPath(steps);
+    downloadJSON(steps, 'outSource.json');
 }
 
 function createPanelLines() {

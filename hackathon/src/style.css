@@ -66,6 +66,38 @@ i.icon {
     margin-top: 20px;
 }
 
+
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
+}
+
+
+.container_button_play {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translate(-50%);
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 15px;
+}
+.button {
+    border-radius: 555555px;
+    margin: 0;
+    padding: 10px;
+    border: none;
+    box-shadow: 0px 4px 4px 6px rgba(0, 0, 0, 0.2);
+    pointer-events: all;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 ul {
     margin: 0;
     padding: 0;
