@@ -2,8 +2,11 @@
 ### ИИ-инструмент работы с данными перспективной городской застройки
 
 Valhalla: https://drive.google.com/drive/folders/1julg_l1x5hLb1y94ku9nl5zF14EGFYYm?usp=drive_link
+
 Скринкаст: https://drive.google.com/file/d/1pXwPO-i4fwPYOVqDohtJJg_XuFdH5zHj/view?usp=sharing
+
 Демо: https://ant-gis.ru/
+
 Презентация: https://www.figma.com/design/42Yu3Xd8BId11FKVHxoRgK/Untitled?node-id=0-1&t=9hsXDBmNK1gkvvgj-1
 
 ##### Тизер:
@@ -12,4 +15,6 @@ Valhalla: https://drive.google.com/drive/folders/1julg_l1x5hLb1y94ku9nl5zF14EGFY
 
 Технические особенности: OSM, Maplibre, PostgreSQL, Docker, React, Valhalla, Node.js, Python.
 Уникальность решения: высокая степень визуализации и кастомизации, наличие нейронных сетей для прогнозирования пешей доступности территорий и зданий представленных в виде изохронов, возможность загрузки своих данных, быстрая интеграция в любую экосистему.
+
+![gifmaker_me](https://github.com/user-attachments/assets/0109bf90-bc6f-408d-8436-2f3097f20491)
 
