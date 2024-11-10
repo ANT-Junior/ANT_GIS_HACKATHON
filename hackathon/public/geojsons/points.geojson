@@ -1,0 +1,151 @@
+{
+    "type": "FeatureCollection",
+    "name": "Тест",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.483649,
+                    55.543499
+                ]
+            },
+            "properties": {
+                "amenity": "hospital",
+                "healthcare": "hospital",
+                "name": "Лаборатория Гемотест"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.485710,
+                    55.545587
+                ]
+            },
+            "properties": {
+                "amenity": "hospital",
+                "healthcare": "hospital",
+                "name": "Поликлиника"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.486553,
+                    55.540954
+                ]
+            },
+            "properties": {
+                "amenity": "hospital",
+                "healthcare": "hospital",
+                "name": "Медцентр Хеликс"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.488314,
+                    55.542238
+                ]
+            },
+            "properties": {
+                "amenity": "school",
+                "name": "Школа №338"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.483319,
+                    55.540424
+                ]
+            },
+            "properties": {
+                "amenity": "kindergarten",
+                "name": "Детский сад"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.481163,
+                    55.545110
+                ]
+            },
+            "properties": {
+                "amenity": "post_office",
+                "name": "Отделение почты №108826"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.487793,
+                    55.543104
+                ]
+            },
+            "properties": {
+                "amenity": "bank",
+                "name": "Отделение Альфа-банка"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.484280,
+                    55.543949
+                ]
+            },
+            "properties": {
+                "amenity": "bank",
+                "name": "Отделение Т-банка"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.478738,
+                    55.544560
+                ]
+            },
+            "properties": {
+                "amenity": "hospital",
+                "healthcare": "hospital",
+                "name": "Аптека ЗдравСити"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    37.478064,
+                    55.544026
+                ]
+            },
+            "properties": {
+                "amenity": "hospital",
+                "healthcare": "hospital",
+                "name": "Семейная клиника ЛКМ"
+            }
+        }
+    ]
+}
